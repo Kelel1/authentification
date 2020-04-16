@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const session = require("express-session");
 const passport = require("passport");
+const ejs = require("ejs");
 const LocalStrategy = require("passport-local").Strategy;
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
@@ -55,7 +56,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
-app.get("/", (req, res) => res.render("index"));
+app.get("/", (req, res) => {
+  res.render("index", { user: req.user });
+});
 app.get("/sign-up", (req, res) => res.render("sign-up-form"));
 app.post("/sign-up", (req, res, next) => {
     const user = new User({
@@ -67,6 +70,19 @@ app.post("/sign-up", (req, res, next) => {
       };
       res.redirect("/");
     });
-  });
+});
+
+app.get("/log-out", (req, res) => {
+  req.logout();
+  res.redirect("/");
+})
+
+app.post(
+  "/log-in",
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/"
+  })
+);
 
 app.listen(3000, () => console.log("app listening on port 3000!"));
